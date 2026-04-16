@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>D2C Contribution Margin Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:       #111110;
+  --ink2:      #3d3d3a;
+  --ink3:      #888780;
+  --page:      #f5f3ee;
+  --page2:     #eceae3;
+  --page3:     #e2dfd7;
+  --rule:      rgba(17,17,16,0.10);
+  --cm1:       #1c5c38;
+  --cm1-light: #e6f2ec;
+  --cm2:       #1c3d5c;
+  --cm2-light: #e6eef5;
+  --cm3:       #7a3200;
+  --cm3-light: #f5ede6;
+  --warn:      #b84f00;
+  --good:      #1c5c38;
+  --r:         5px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--page);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+.site-header {
+  background: var(--ink);
+  color: var(--page);
+  padding: 0 48px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 24px;
+  padding-top: 36px;
+  padding-bottom: 0;
+}
+.header-left { padding-bottom: 20px; }
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245,243,238,0.45);
+  margin-bottom: 10px;
+}
+.site-title {
+  font-family: 'Lora', serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+}
+.site-title em { font-style: italic; color: rgba(245,243,238,0.55); }
+.header-meta {
+  font-size: 11px;
+  color: rgba(245,243,238,0.4);
+  margin-top: 8px;
+  letter-spacing: 0.03em;
+}
+.header-tabs {
+  display: flex;
+  align-self: end;
+}
+.htab {
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  padding: 12px 20px 11px;
+  color: rgba(245,243,238,0.45);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  user-select: none;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.htab:hover { color: rgba(245,243,238,0.8); }
+.htab.active { color: var(--page); border-bottom-color: var(--page3); }
+
+/* ─── LAYOUT ─── */
+main { max-width: 1160px; padding: 36px 48px 60px; overflow-x: hidden; }
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ─── EXPLAINER PANEL ─── */
+.framework-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.intro-text h2 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+.intro-text p {
+  font-size: 13.5px;
+  color: var(--ink2);
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+/* CM Level cards */
+.cm-levels { display: flex; flex-direction: column; gap: 2px; }
+.cm-level {
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .15s;
+}
+.cm-level:hover { transform: translateX(3px); }
+.cm-level-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+}
+.cm-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cm-level-title { font-size: 13px; font-weight: 600; flex: 1; }
+.cm-level-formula { font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+.cm-level-body {
+  padding: 0 16px 14px 16px;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+.cm-level-costs {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+}
+.cost-tag {
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+}
+
+.lv1 { background: var(--cm1-light); color: var(--cm1); }
+.lv1 .cm-badge { background: var(--cm1); color: #fff; }
+.lv2 { background: var(--cm2-light); color: var(--cm2); }
+.lv2 .cm-badge { background: var(--cm2); color: #fff; }
+.lv3 { background: var(--cm3-light); color: var(--cm3); }
+.lv3 .cm-badge { background: var(--cm3); color: #fff; }
+
+/* Range table */
+.range-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin-top: 20px;
+}
+.range-table th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--rule);
+  font-weight: 500;
+}
+.range-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink2);
+}
+.range-table tr:last-child td { border-bottom: none; }
+.badge-cm1 { font-family:'IBM Plex Mono',monospace; font-size:11px; background:var(--cm1-light); color:var(--cm1); padding:2px 7px; border-radius:3px; }
+.badge-cm2 { font-family:'IBM Plex Mono',monospace; font-size:11px; background:var(--cm2-light); color:var(--cm2); padding:2px 7px; border-radius:3px; }
+.badge-cm3 { font-family:'IBM Plex Mono',monospace; font-size:11px; background:var(--cm3-light); color:var(--cm3); padding:2px 7px; border-radius:3px; }
+
+/* Why section */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.why-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 16px;
+}
+.why-q {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+.why-a { font-size: 12.5px; color: var(--ink2); line-height: 1.6; }
+
+/* Divider */
+hr.section-rule { border: none; border-top: 1px solid var(--rule); margin: 32px 0; }
+
+/* ─── CALCULATOR PANEL ─── */
+.calc-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.inputs-col { display: flex; flex-direction: column; gap: 14px; }
+
+.input-section {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.input-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--page2);
+}
+.input-section-head .badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: #fff;
+}
+.badge-c1 { background: var(--cm1); }
+.badge-c2 { background: var(--cm2); }
+.badge-c3 { background: var(--cm3); }
+.badge-nr { background: var(--ink2); }
+
+.input-section-head .head-label { font-size: 12px; font-weight: 600; color: var(--ink2); }
+.input-section-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.field { display: flex; flex-direction: column; gap: 3px; }
+.field label {
+  font-size: 11px;
+  color: var(--ink3);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field-hint {
+  font-size: 9.5px;
+  color: var(--ink3);
+  font-style: italic;
+  margin-left: auto;
+}
+input[type=number] {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: #0000cc;
+  padding: 7px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--page);
+  width: 100%;
+  outline: none;
+  transition: border-color .15s;
+  min-height: 40px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type=number]:focus { border-color: var(--ink2); }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* Results col */
+.results-col { display: flex; flex-direction: column; gap: 14px; }
+
+/* KPI strip */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+}
+.kpi {
+  border-radius: var(--r);
+  padding: 14px 16px;
+  border: 1px solid transparent;
+}
+.kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; opacity: 0.65; font-weight: 500; }
+.kpi-value { font-family: 'IBM Plex Mono', monospace; font-size: 24px; font-weight: 500; line-height: 1; }
+.kpi-sub   { font-size: 10.5px; margin-top: 4px; opacity: 0.6; }
+.kpi.k1 { background: var(--cm1-light); color: var(--cm1); border-color: rgba(28,92,56,.15); }
+.kpi.k2 { background: var(--cm2-light); color: var(--cm2); border-color: rgba(28,61,92,.15); }
+.kpi.k3 { background: var(--cm3-light); color: var(--cm3); border-color: rgba(122,50,0,.15); }
+
+/* Waterfall */
+.waterfall-box {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.wf-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--page2);
+}
+.wf-rows { padding: 6px 0; }
+.wf-row {
+  display: grid;
+  grid-template-columns: 190px 1fr 72px 64px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  transition: background .1s;
+}
+.wf-row:hover { background: var(--page); }
+.wf-row.cm-row {
+  background: var(--page2);
+  padding: 9px 14px;
+  margin: 3px 0;
+}
+.wf-lbl { font-size: 12px; color: var(--ink2); }
+.wf-lbl.neg { color: var(--warn); }
+.wf-lbl.cm  { font-weight: 600; font-size: 12.5px; }
+.wf-bar-track { height:8px; background:var(--page3); border-radius:4px; overflow:hidden; }
+.wf-bar-fill  { height:100%; border-radius:4px; transition: width .35s ease; }
+.wf-amt { font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:right; }
+.wf-amt.neg { color: var(--warn); }
+.wf-pct { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink3); text-align:right; }
+.wf-row.hdr { padding: 5px 14px 4px; }
+.wf-row.hdr .wf-lbl, .wf-row.hdr .wf-amt, .wf-row.hdr .wf-pct {
+  font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink3); font-weight:500;
+}
+
+/* Insight box */
+.insight {
+  background: var(--page2);
+  border-left: 3px solid var(--ink2);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: var(--ink2);
+  line-height: 1.65;
+}
+.insight.good { border-left-color: var(--cm1); background: var(--cm1-light); color: var(--cm1); }
+.insight.warn { border-left-color: var(--warn); background: var(--cm3-light); color: var(--cm3); }
+
+/* ─── SCENARIO PANEL ─── */
+.scenario-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.scenario-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.sc-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.sc-name { font-size: 13px; font-weight: 600; }
+.sc-desc { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.sc-body { padding: 12px 14px; display:flex; flex-direction:column; gap:8px; }
+.sc-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+.sc-row-label { color: var(--ink3); }
+.sc-row-val { font-family:'IBM Plex Mono',monospace; font-size:12px; }
+.sc-divider { border:none; border-top:1px solid var(--rule); }
+.sc-cm { display:flex; flex-direction:column; gap:6px; padding-top:4px; }
+.sc-cm-row { display:flex; justify-content:space-between; align-items:center; }
+.sc-cm-label { font-size:12px; font-weight:600; }
+.sc-cm-val { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:500; }
+
+.scenario-note {
+  margin-top: 20px;
+  background: var(--page2);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  font-size: 12.5px;
+  color: var(--ink2);
+  line-height: 1.7;
+}
+
+/* ─── UNIT ECON PANEL ─── */
+.ue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.ue-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 18px;
+}
+.ue-card h3 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.ue-metric { display:flex; justify-content:space-between; align-items:baseline; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.ue-metric:last-child { border-bottom: none; }
+.ue-mlabel { font-size:12.5px; color:var(--ink2); }
+.ue-mval   { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:500; }
+.ue-mbench { font-size:10.5px; color:var(--ink3); font-style:italic; }
+.ue-mval.good { color:var(--good); }
+.ue-mval.warn { color:var(--warn); }
+
+/* ─── SHARED ─── */
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after { content:''; flex:1; height:1px; background:var(--rule); }
+
+.disclaimer {
+  font-size: 10.5px;
+  color: var(--ink3);
+  line-height: 1.6;
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+
+/* animations */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.panel.active { animation: fadeUp .25s ease; }
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — all breakpoints
+═══════════════════════════════════════ */
+
+/* Tablet: ≤ 900px */
+@media (max-width: 900px) {
+  .site-header {
+    grid-template-columns: 1fr;
+    padding: 20px 20px 0;
+    gap: 0;
+  }
+  .header-left { padding-bottom: 16px; }
+  .site-title { font-size: 22px; }
+  .header-tabs {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid rgba(245,243,238,0.12);
+    scrollbar-width: none;
+  }
+  .header-tabs::-webkit-scrollbar { display: none; }
+  .htab { padding: 10px 16px 9px; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+
+  main { padding: 20px 20px 48px; }
+
+  .framework-intro { grid-template-columns: 1fr; gap: 24px; }
+  .why-grid { grid-template-columns: 1fr; gap: 10px; }
+
+  .calc-grid { grid-template-columns: 1fr; }
+  .kpi-strip { grid-template-columns: repeat(3,1fr); }
+
+  .wf-row { grid-template-columns: 1fr auto auto; gap: 8px; }
+  .wf-bar-track { display: none; }
+
+  .scenario-grid { grid-template-columns: 1fr; gap: 12px; }
+
+  .ue-grid { grid-template-columns: 1fr; gap: 16px; }
+  .ue-card[style*="grid-column"] { grid-column: 1 !important; }
+
+  .range-table { font-size: 11.5px; }
+  .range-table th, .range-table td { padding: 7px 8px; }
+}
+
+/* Mobile: ≤ 600px */
+@media (max-width: 600px) {
+  .site-header { padding: 16px 16px 0; }
+  .site-title { font-size: 19px; line-height: 1.2; }
+  .eyebrow { font-size: 9px; margin-bottom: 6px; }
+  .header-meta { font-size: 10px; }
+  .htab { padding: 10px 14px 9px; font-size: 10.5px; }
+
+  main { padding: 16px 14px 48px; }
+
+  .intro-text h2 { font-size: 17px; }
+  .intro-text p { font-size: 13px; }
+
+  /* CM level cards — tighten */
+  .cm-level-header { padding: 10px 12px; gap: 10px; }
+  .cm-level-title { font-size: 12.5px; }
+  .cm-level-body { padding: 0 12px 12px; font-size: 12px; }
+
+  .why-grid { grid-template-columns: 1fr; }
+  .why-card { padding: 12px; }
+
+  /* Calculator — stack field rows */
+  .field-row { grid-template-columns: 1fr; gap: 8px; }
+  .input-section-body { padding: 10px 12px; }
+
+  /* KPI strip — keep 3 cols but shrink */
+  .kpi-strip { gap: 6px; }
+  .kpi { padding: 10px 10px; }
+  .kpi-value { font-size: 18px; }
+  .kpi-label { font-size: 9px; }
+  .kpi-sub { font-size: 9.5px; }
+
+  /* Waterfall — 3 column: label | amount | pct */
+  .wf-row { grid-template-columns: 1fr auto auto; gap: 6px; padding: 6px 10px; }
+  .wf-bar-track { display: none; }
+  .wf-lbl { font-size: 11px; }
+  .wf-amt { font-size: 11px; }
+  .wf-pct { font-size: 10px; }
+  .wf-row.hdr .wf-lbl,
+  .wf-row.hdr .wf-amt,
+  .wf-row.hdr .wf-pct { font-size: 9px; }
+  .waterfall-box { overflow-x: auto; }
+
+  /* Scenarios — single col */
+  .scenario-grid { grid-template-columns: 1fr; }
+  .sc-cm-val { font-size: 14px; }
+
+  /* Unit econ */
+  .ue-grid { grid-template-columns: 1fr; }
+  .ue-metric { flex-wrap: wrap; gap: 4px; }
+  .ue-mval { font-size: 14px; }
+  .ue-mlabel { font-size: 12px; max-width: 70%; }
+
+  /* Benchmark table — hide "strong" column on very small screens */
+  .range-table { font-size: 11px; }
+  .range-table th:nth-child(4),
+  .range-table td:nth-child(4) { display: none; }
+
+  hr.section-rule { margin: 20px 0; }
+
+  /* Insight box */
+  .insight { font-size: 12px; padding: 10px 12px; }
+}
+
+/* Very small: ≤ 380px */
+@media (max-width: 380px) {
+  .site-title { font-size: 17px; }
+  .kpi-strip { grid-template-columns: 1fr 1fr 1fr; }
+  .kpi-value { font-size: 16px; }
+  .htab { padding: 9px 12px; font-size: 10px; }
+  main { padding: 14px 12px 40px; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <div class="eyebrow">D2C Margin Intelligence · Framework Tool</div>
+    <div class="site-title">Contribution Margin <em>Framework</em><br>for Direct-to-Consumer Brands</div>
+    <div class="header-meta">Generic · Brand-agnostic · Replace example numbers with your own data</div>
+  </div>
+  <div class="header-tabs">
+    <div class="htab active" onclick="show('explainer',this)">Framework</div>
+    <div class="htab" onclick="show('calculator',this)">Calculator</div>
+    <div class="htab" onclick="show('scenario',this)">Scenarios</div>
+    <div class="htab" onclick="show('uniteco',this)">Unit Economics</div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     PANEL 1 — FRAMEWORK EXPLAINER
+═══════════════════════════════════════════════ -->
+<div id="panel-explainer" class="panel active">
+
+  <div class="framework-intro">
+    <div class="intro-text">
+      <h2>Why a single gross margin number isn't enough for D2C</h2>
+      <p>In a traditional retail business, you hand off inventory to a distributor. The brand's job ends at the factory gate. In D2C, you own the full chain — manufacturing, packaging, warehousing, shipping, returns, acquiring every customer. Each of those layers eats into your revenue in a different way.</p>
+      <p>The CM1/CM2/CM3 framework layers these costs sequentially so you can see <em>exactly where</em> margin is being consumed — and which levers will actually move the needle.</p>
+      <p>The three levels answer three distinct questions a founder or analyst needs to separate:</p>
+
+      <table class="range-table" style="margin-top:16px;">
+        <thead><tr><th>Level</th><th>Question answered</th><th>Healthy range</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge-cm1">CM1</span></td><td>Is the product itself profitable?</td><td>50 – 70%</td></tr>
+          <tr><td><span class="badge-cm2">CM2</span></td><td>Is the order profitable after fulfilment?</td><td>30 – 50%</td></tr>
+          <tr><td><span class="badge-cm3">CM3</span></td><td>Is the growth engine profitable after marketing?</td><td>15 – 35%</td></tr>
+        </tbody>
+      </table>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-q">CM1 is weak</div>
+          <div class="why-a">Sourcing or pricing problem. No amount of marketing efficiency will fix it. Renegotiate COGS or reprice.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-q">CM2 is weak</div>
+          <div class="why-a">Operational problem. Too heavy on shipping, returns, or 3PL. Volume might help via negotiation.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-q">CM3 is weak</div>
+          <div class="why-a">Marketing problem. CAC is too high relative to order value. Focus: ROAS, retention, organic channels.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="cm-levels">
+        <div class="cm-level lv1">
+          <div class="cm-level-header">
+            <span class="cm-badge">CM1</span>
+            <span class="cm-level-title">Gross Contribution</span>
+            <span class="cm-level-formula">NR − COGS</span>
+          </div>
+          <div class="cm-level-body">
+            <div>The purest measure of product economics. Net Revenue (after discounts &amp; returns) minus what it cost to make and land the product. Similar to gross profit — but using net revenue, not gross.</div>
+            <div class="cm-level-costs">
+              <span class="cost-tag">Product / manufacturing cost</span>
+              <span class="cost-tag">Raw materials</span>
+              <span class="cost-tag">Inbound freight</span>
+              <span class="cost-tag">Direct labour</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);padding:4px 0;">↓ minus fulfilment costs</div>
+
+        <div class="cm-level lv2">
+          <div class="cm-level-header">
+            <span class="cm-badge">CM2</span>
+            <span class="cm-level-title">Fulfilment Contribution</span>
+            <span class="cm-level-formula">CM1 − fulfilment</span>
+          </div>
+          <div class="cm-level-body">
+            <div>CM1 minus all the variable costs of getting the order to the customer's door and handling returns. These are per-order costs — they scale directly with volume.</div>
+            <div class="cm-level-costs">
+              <span class="cost-tag">Packaging &amp; unboxing</span>
+              <span class="cost-tag">3PL pick &amp; pack</span>
+              <span class="cost-tag">Outbound shipping</span>
+              <span class="cost-tag">Return shipping</span>
+              <span class="cost-tag">Payment gateway fee</span>
+              <span class="cost-tag">Marketplace commission</span>
+              <span class="cost-tag">COD handling surcharge</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);padding:4px 0;">↓ minus performance marketing</div>
+
+        <div class="cm-level lv3">
+          <div class="cm-level-header">
+            <span class="cm-badge">CM3</span>
+            <span class="cm-level-title">Marketing Contribution</span>
+            <span class="cm-level-formula">CM2 − marketing</span>
+          </div>
+          <div class="cm-level-body">
+            <div>CM2 minus the variable marketing spend tied to acquiring that order. Only <em>performance</em> marketing goes here — Meta/Google ads, affiliate fees, influencer CPA. Fixed brand spend (photoshoots, PR) goes below CM3 in SG&amp;A.</div>
+            <div class="cm-level-costs">
+              <span class="cost-tag">Paid social (Meta, Google)</span>
+              <span class="cost-tag">Affiliate / CPA commissions</span>
+              <span class="cost-tag">Influencer per-sale fee</span>
+              <span class="cost-tag">SEO tools (variable)</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink3);padding:4px 0;">↓ minus fixed overheads (SG&A)</div>
+
+        <div class="cm-level" style="background:var(--page2);color:var(--ink2);border-radius:var(--r);">
+          <div class="cm-level-header">
+            <span class="cm-badge" style="background:var(--ink2);color:#fff;">EBITDA</span>
+            <span class="cm-level-title">Operating Profit</span>
+            <span class="cm-level-formula">CM3 − SG&amp;A</span>
+          </div>
+          <div class="cm-level-body">
+            Salaries, rent, tech subscriptions, brand marketing campaigns. These are fixed — they don't move per order, which is why they sit below CM3.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-rule"/>
+
+  <div class="section-label">Key distinctions that trip people up</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+    <div class="why-card">
+      <div class="why-q">Variable vs Fixed</div>
+      <div class="why-a">Only variable costs go into CM1–CM3. If a cost doesn't change with each order, it belongs in SG&amp;A. Salary of your logistics manager = fixed = below CM3.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-q">Performance vs Brand marketing</div>
+      <div class="why-a">Google Ads spend that directly drove this order = CM3. Annual photoshoot for the brand = SG&amp;A. The test: would this cost vanish if you paused new orders?</div>
+    </div>
+    <div class="why-card">
+      <div class="why-q">Gross vs Net revenue</div>
+      <div class="why-a">Always use net revenue (after discounts and returns) as your base for all CM% calculations. Using MRP/gross revenue makes margins look falsely healthy.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL 2 — CALCULATOR
+═══════════════════════════════════════════════ -->
+<div id="panel-calculator" class="panel">
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:20px;padding:10px 14px;background:var(--page2);border-radius:var(--r);border-left:3px solid var(--ink3);">
+    Numbers below are illustrative defaults for a mid-market Indian D2C brand (~₹700 AOV). Replace every blue value with your brand's actual data.
+  </div>
+
+  <div class="calc-grid">
+    <!-- INPUTS -->
+    <div class="inputs-col">
+
+      <div class="input-section">
+        <div class="input-section-head">
+          <span class="badge badge-nr">NR</span>
+          <span class="head-label">Revenue Inputs</span>
+        </div>
+        <div class="input-section-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Selling Price (MRP) ₹</label>
+              <input type="number" id="mrp" value="699" oninput="calc()"/>
+            </div>
+            <div class="field">
+              <label>Discount % <span class="field-hint">promo/coupon</span></label>
+              <input type="number" id="disc" value="15" oninput="calc()"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Return Rate % <span class="field-hint">orders returned</span></label>
+            <input type="number" id="ret" value="8" oninput="calc()"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-section-head">
+          <span class="badge badge-c1">CM1</span>
+          <span class="head-label">COGS — deducted at CM1</span>
+        </div>
+        <div class="input-section-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Manufacturing / product cost ₹</label>
+              <input type="number" id="cogs" value="160" oninput="calc()"/>
+            </div>
+            <div class="field">
+              <label>Inbound freight ₹</label>
+              <input type="number" id="inbound" value="18" oninput="calc()"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-section-head">
+          <span class="badge badge-c2">CM2</span>
+          <span class="head-label">Fulfilment — deducted at CM2</span>
+        </div>
+        <div class="input-section-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Packaging ₹</label>
+              <input type="number" id="pkg" value="32" oninput="calc()"/>
+            </div>
+            <div class="field">
+              <label>3PL pick &amp; pack ₹</label>
+              <input type="number" id="pl3" value="28" oninput="calc()"/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Outbound shipping ₹</label>
+              <input type="number" id="ship" value="65" oninput="calc()"/>
+            </div>
+            <div class="field">
+              <label>Return cost per return ₹</label>
+              <input type="number" id="retcost" value="40" oninput="calc()"/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Gateway fee %</label>
+              <input type="number" id="gw" value="2" oninput="calc()"/>
+            </div>
+            <div class="field">
+              <label>Marketplace commission %</label>
+              <input type="number" id="mkt" value="0" oninput="calc()"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-section-head">
+          <span class="badge badge-c3">CM3</span>
+          <span class="head-label">Performance Marketing — deducted at CM3</span>
+        </div>
+        <div class="input-section-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Ad spend per order ₹</label>
+              <input type="number" id="ads" value="120" oninput="calc()"/>
+            </div>
+            <div class="field">
+              <label>Affiliate / CPA fee ₹</label>
+              <input type="number" id="aff" value="15" oninput="calc()"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /inputs-col -->
+
+    <!-- RESULTS -->
+    <div class="results-col">
+      <div class="kpi-strip">
+        <div class="kpi k1">
+          <div class="kpi-label">CM1 %</div>
+          <div class="kpi-value" id="kpi-cm1">—</div>
+          <div class="kpi-sub">Gross contribution</div>
+        </div>
+        <div class="kpi k2">
+          <div class="kpi-label">CM2 %</div>
+          <div class="kpi-value" id="kpi-cm2">—</div>
+          <div class="kpi-sub">After fulfilment</div>
+        </div>
+        <div class="kpi k3">
+          <div class="kpi-label">CM3 %</div>
+          <div class="kpi-value" id="kpi-cm3">—</div>
+          <div class="kpi-sub">After marketing</div>
+        </div>
+      </div>
+
+      <div class="waterfall-box">
+        <div class="wf-title">Margin Waterfall — ₹ per Order</div>
+        <div class="wf-rows">
+          <div class="wf-row hdr">
+            <div class="wf-lbl">Line</div>
+            <div></div>
+            <div class="wf-amt">₹ / order</div>
+            <div class="wf-pct">% NR</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl">Net Revenue</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-nr" style="width:100%;background:#c5c2ba;"></div></div>
+            <div class="wf-amt" id="v-nr">—</div>
+            <div class="wf-pct">100%</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl neg">− COGS</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-cogs" style="background:#c02020bb;"></div></div>
+            <div class="wf-amt neg" id="v-cogs">—</div>
+            <div class="wf-pct" id="p-cogs">—</div>
+          </div>
+          <div class="wf-row cm-row">
+            <div class="wf-lbl cm" style="color:var(--cm1)">CM1 — Gross Contribution</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-cm1" style="background:var(--cm1);"></div></div>
+            <div class="wf-amt" id="v-cm1" style="color:var(--cm1);font-weight:600;">—</div>
+            <div class="wf-pct" id="p-cm1" style="color:var(--cm1);">—</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl neg">− Packaging &amp; 3PL &amp; shipping</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-ful1" style="background:#c05a20bb;"></div></div>
+            <div class="wf-amt neg" id="v-ful1">—</div>
+            <div class="wf-pct" id="p-ful1">—</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl neg">− Returns (weighted)</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-ret" style="background:#c05a20bb;"></div></div>
+            <div class="wf-amt neg" id="v-ret">—</div>
+            <div class="wf-pct" id="p-ret">—</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl neg">− Gateway &amp; commission</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-gw" style="background:#c05a20bb;"></div></div>
+            <div class="wf-amt neg" id="v-gw">—</div>
+            <div class="wf-pct" id="p-gw">—</div>
+          </div>
+          <div class="wf-row cm-row">
+            <div class="wf-lbl cm" style="color:var(--cm2)">CM2 — Fulfilment Contribution</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-cm2" style="background:var(--cm2);"></div></div>
+            <div class="wf-amt" id="v-cm2" style="color:var(--cm2);font-weight:600;">—</div>
+            <div class="wf-pct" id="p-cm2" style="color:var(--cm2);">—</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl neg">− Performance ad spend</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-ads" style="background:#7a320088;"></div></div>
+            <div class="wf-amt neg" id="v-ads">—</div>
+            <div class="wf-pct" id="p-ads">—</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-lbl neg">− Affiliate / CPA</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-aff" style="background:#7a320088;"></div></div>
+            <div class="wf-amt neg" id="v-aff">—</div>
+            <div class="wf-pct" id="p-aff">—</div>
+          </div>
+          <div class="wf-row cm-row">
+            <div class="wf-lbl cm" style="color:var(--cm3)">CM3 — Marketing Contribution</div>
+            <div class="wf-bar-track"><div class="wf-bar-fill" id="b-cm3" style="background:var(--cm3);"></div></div>
+            <div class="wf-amt" id="v-cm3" style="color:var(--cm3);font-weight:600;">—</div>
+            <div class="wf-pct" id="p-cm3" style="color:var(--cm3);">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight" id="insight-box">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL 3 — SCENARIOS
+═══════════════════════════════════════════════ -->
+<div id="panel-scenario" class="panel">
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:20px;padding:10px 14px;background:var(--page2);border-radius:var(--r);border-left:3px solid var(--ink3);">
+    These three scenarios use the same cost structure as the Calculator. They show how small input changes compound across the waterfall — the most common D2C strategic question.
+  </div>
+
+  <div class="scenario-grid" id="scenario-cards"></div>
+
+  <div class="scenario-note" id="scenario-note"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL 4 — UNIT ECONOMICS
+═══════════════════════════════════════════════ -->
+<div id="panel-uniteco" class="panel">
+  <div class="ue-grid">
+    <div class="ue-card">
+      <h3>LTV &amp; CAC Metrics</h3>
+      <div class="ue-metric">
+        <div>
+          <div class="ue-mlabel">12-month LTV (3 orders × CM3)</div>
+          <div class="ue-mbench">Based on Calculator inputs</div>
+        </div>
+        <div class="ue-mval" id="ue-ltv">—</div>
+      </div>
+      <div class="ue-metric">
+        <div>
+          <div class="ue-mlabel">Blended CAC (ads ÷ 80%)</div>
+          <div class="ue-mbench">Assumes 20% repeat (no CAC)</div>
+        </div>
+        <div class="ue-mval" id="ue-cac">—</div>
+      </div>
+      <div class="ue-metric">
+        <div>
+          <div class="ue-mlabel">LTV : CAC Ratio</div>
+          <div class="ue-mbench">Target ≥ 3×</div>
+        </div>
+        <div class="ue-mval" id="ue-ratio">—</div>
+      </div>
+      <div class="ue-metric">
+        <div>
+          <div class="ue-mlabel">CAC Payback (orders)</div>
+          <div class="ue-mbench">Target ≤ 3 orders</div>
+        </div>
+        <div class="ue-mval" id="ue-payback">—</div>
+      </div>
+    </div>
+
+    <div class="ue-card">
+      <h3>How to read LTV : CAC</h3>
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.75;display:flex;flex-direction:column;gap:10px;">
+        <div><strong style="color:var(--good)">≥ 5×</strong> — Excellent. Efficient acquisition, strong repeat. You can scale aggressively.</div>
+        <div><strong style="color:var(--cm1)">3× – 5×</strong> — Healthy. Sustainable growth. Optimise marketing mix for efficiency.</div>
+        <div><strong style="color:var(--warn)">2× – 3×</strong> — Marginal. Cover fixed costs is hard. Focus on improving repeat rate or reducing CAC.</div>
+        <div><strong style="color:#c02020">Below 2×</strong> — Unsustainable. Every new customer costs more to acquire than they generate in contribution. Growth destroys value.</div>
+        <hr class="section-rule" style="margin:6px 0;"/>
+        <div style="font-size:11.5px;color:var(--ink3);">The fastest way to improve LTV:CAC is growing the repeat rate — returning customers carry near-zero CAC, which dilutes the blended number significantly.</div>
+      </div>
+    </div>
+
+    <div class="ue-card" style="grid-column:1/-1;">
+      <h3>Industry Benchmark Ranges — Indian D2C</h3>
+      <table class="range-table">
+        <thead><tr><th>Metric</th><th>Below target</th><th>Target range</th><th>Strong</th><th>Your model</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge-cm1">CM1 %</span></td><td style="color:#c02020">Below 40%</td><td>50 – 70%</td><td style="color:var(--good)">Above 65%</td><td><span id="bm-cm1" style="font-family:'IBM Plex Mono',monospace;font-size:13px;">—</span></td></tr>
+          <tr><td><span class="badge-cm2">CM2 %</span></td><td style="color:#c02020">Below 25%</td><td>30 – 50%</td><td style="color:var(--good)">Above 45%</td><td><span id="bm-cm2" style="font-family:'IBM Plex Mono',monospace;font-size:13px;">—</span></td></tr>
+          <tr><td><span class="badge-cm3">CM3 %</span></td><td style="color:#c02020">Below 10%</td><td>15 – 35%</td><td style="color:var(--good)">Above 30%</td><td><span id="bm-cm3" style="font-family:'IBM Plex Mono',monospace;font-size:13px;">—</span></td></tr>
+          <tr><td>LTV : CAC</td><td style="color:#c02020">Below 2×</td><td>3× – 5×</td><td style="color:var(--good)">Above 5×</td><td><span id="bm-ratio" style="font-family:'IBM Plex Mono',monospace;font-size:13px;">—</span></td></tr>
+        </tbody>
+      </table>
+      <div class="disclaimer">Benchmarks are directional for Indian D2C. Actual ranges vary significantly by category (fashion returns are 3–4× skincare), AOV, and channel mix. Use as a compass, not a target.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const g = id => parseFloat(document.getElementById(id)?.value) || 0;
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const pct = n => (Math.round(n * 10) / 10) + '%';
+
+function compute(p) {
+  const nr   = p.mrp * (1 - p.disc/100) * (1 - p.ret/100);
+  const cogs = (p.cogs + p.inbound) * (1 - p.ret/100);
+  const cm1  = nr - cogs;
+  const fulfilShip = p.pkg + p.pl3 + p.ship;
+  const retW = (p.ret/100) * p.retcost;
+  const gwAmt = nr * (p.gw + p.mkt) / 100;
+  const fulfil = fulfilShip + retW + gwAmt;
+  const cm2  = cm1 - fulfil;
+  const mktg = p.ads + p.aff;
+  const cm3  = cm2 - mktg;
+  return { nr, cogs, cm1, cm1p: cm1/nr*100,
+           fulfilShip, retW, gwAmt, fulfil,
+           cm2, cm2p: cm2/nr*100,
+           mktg, cm3, cm3p: cm3/nr*100 };
+}
+
+function setBar(id, val, nr) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = Math.max(0, Math.min(100, Math.abs(val)/nr*100)) + '%';
+}
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function calc() {
+  const p = { mrp:g('mrp'), disc:g('disc'), ret:g('ret'),
+              cogs:g('cogs'), inbound:g('inbound'),
+              pkg:g('pkg'), pl3:g('pl3'), ship:g('ship'),
+              retcost:g('retcost'), gw:g('gw'), mkt:g('mkt'),
+              ads:g('ads'), aff:g('aff') };
+  const r = compute(p);
+  const nr = r.nr;
+
+  setText('v-nr', fmt(nr));
+  setText('v-cogs', '−' + fmt(r.cogs));   setBar('b-cogs', r.cogs, nr);   setText('p-cogs', pct(r.cogs/nr*100));
+  setText('v-cm1',  fmt(r.cm1));           setBar('b-cm1',  r.cm1,  nr);   setText('p-cm1',  pct(r.cm1p));
+  setText('v-ful1', '−' + fmt(r.fulfilShip)); setBar('b-ful1', r.fulfilShip, nr); setText('p-ful1', pct(r.fulfilShip/nr*100));
+  setText('v-ret',  '−' + fmt(r.retW));    setBar('b-ret',  r.retW, nr);   setText('p-ret',  pct(r.retW/nr*100));
+  setText('v-gw',   '−' + fmt(r.gwAmt));   setBar('b-gw',   r.gwAmt, nr);  setText('p-gw',   pct(r.gwAmt/nr*100));
+  setText('v-cm2',  fmt(r.cm2));           setBar('b-cm2',  r.cm2,  nr);   setText('p-cm2',  pct(r.cm2p));
+  setText('v-ads',  '−' + fmt(p.ads));     setBar('b-ads',  p.ads,  nr);   setText('p-ads',  pct(p.ads/nr*100));
+  setText('v-aff',  '−' + fmt(p.aff));     setBar('b-aff',  p.aff,  nr);   setText('p-aff',  pct(p.aff/nr*100));
+  setText('v-cm3',  fmt(r.cm3));           setBar('b-cm3',  Math.max(0,r.cm3), nr); setText('p-cm3', pct(r.cm3p));
+
+  setText('kpi-cm1', pct(r.cm1p));
+  setText('kpi-cm2', pct(r.cm2p));
+  setText('kpi-cm3', pct(r.cm3p));
+
+  // Insight
+  const ib = document.getElementById('insight-box');
+  if (ib) {
+    ib.className = 'insight';
+    if (r.cm3p < 0) {
+      ib.className += ' warn';
+      ib.innerHTML = `<strong>⚠ CM3 is negative (${pct(r.cm3p)}).</strong> You're losing ${fmt(Math.abs(r.cm3))} on every order after marketing spend. Volume makes this worse, not better. Fix the acquisition cost or increase AOV before scaling.`;
+    } else if (r.cm3p < 10) {
+      ib.className += ' warn';
+      ib.innerHTML = `<strong>CM3 at ${pct(r.cm3p)} — thin margin.</strong> Positive, but barely. The primary lever here is improving repeat rate to reduce effective CAC, or tightening ad ROAS to reduce spend per acquired order.`;
+    } else if (r.cm2p < 30) {
+      ib.innerHTML = `<strong>CM2 at ${pct(r.cm2p)} — fulfilment is heavy.</strong> Despite acceptable CM3, high fulfilment costs limit headroom. Negotiate 3PL rates at volume or reduce return rate to structurally improve this layer.`;
+    } else {
+      ib.className += ' good';
+      ib.innerHTML = `<strong>Healthy across all three levels.</strong> CM1 ${pct(r.cm1p)} · CM2 ${pct(r.cm2p)} · CM3 ${pct(r.cm3p)}. Each layer is contributing positively. Focus shifts to scale — and building repeat rate to reduce blended CAC.`;
+    }
+  }
+
+  updateScenarios(p, r);
+  updateUnitEco(r, p);
+}
+
+function updateScenarios(baseP, baseR) {
+  const scenarios = [
+    {
+      name: 'Base Case', color: '#3d3d3a',
+      desc: 'Current inputs as entered',
+      p: {...baseP},
+      note: null
+    },
+    {
+      name: 'AOV Growth', color: '#1c5c38',
+      desc: 'Price +15%, discount tightened to 10%',
+      p: {...baseP, mrp: baseP.mrp * 1.15, disc: 10},
+      note: 'Higher AOV improves CM3 most dramatically — fulfilment costs stay near-fixed while net revenue rises.'
+    },
+    {
+      name: 'Ops Efficiency', color: '#1c3d5c',
+      desc: 'Shipping −₹10, returns −3pp, ad ROAS improves (−₹25)',
+      p: {...baseP, ship: Math.max(30, baseP.ship - 10), ret: Math.max(0, baseP.ret - 3), ads: Math.max(20, baseP.ads - 25)},
+      note: 'Operational improvements compound: lower return rate reduces both retWeighted cost and lost revenue simultaneously.'
+    }
+  ];
+
+  const container = document.getElementById('scenario-cards');
+  if (!container) return;
+
+  container.innerHTML = scenarios.map((sc, i) => {
+    const r = compute(sc.p);
+    const baseCM3 = compute(baseP).cm3p;
+    const delta = i === 0 ? null : (r.cm3p - baseCM3).toFixed(1);
+    const deltaStr = delta ? (delta > 0 ? `<span style="color:var(--good)">↑${delta}pp vs base</span>` : `<span style="color:var(--warn)">↓${Math.abs(delta)}pp vs base</span>`) : '';
+    return `<div class="scenario-card">
+      <div class="sc-head" style="border-top:3px solid ${sc.color}">
+        <div class="sc-name">${sc.name}</div>
+        <div class="sc-desc">${sc.desc}</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row"><span class="sc-row-label">Net Revenue</span><span class="sc-row-val">${fmt(r.nr)}</span></div>
+        <div class="sc-row"><span class="sc-row-label">COGS</span><span class="sc-row-val">−${fmt(r.cogs)}</span></div>
+        <div class="sc-row"><span class="sc-row-label">Fulfilment</span><span class="sc-row-val">−${fmt(r.fulfil)}</span></div>
+        <div class="sc-row"><span class="sc-row-label">Marketing</span><span class="sc-row-val">−${fmt(r.mktg)}</span></div>
+        <hr class="sc-divider"/>
+        <div class="sc-cm">
+          <div class="sc-cm-row"><span class="sc-cm-label" style="color:var(--cm1)">CM1</span><span class="sc-cm-val" style="color:var(--cm1)">${pct(r.cm1p)}</span></div>
+          <div class="sc-cm-row"><span class="sc-cm-label" style="color:var(--cm2)">CM2</span><span class="sc-cm-val" style="color:var(--cm2)">${pct(r.cm2p)}</span></div>
+          <div class="sc-cm-row"><span class="sc-cm-label" style="color:var(--cm3)">CM3</span><span class="sc-cm-val" style="color:var(--cm3)">${pct(r.cm3p)} ${deltaStr}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const noteEl = document.getElementById('scenario-note');
+  if (noteEl) {
+    const aovR   = compute(scenarios[1].p);
+    const opsR   = compute(scenarios[2].p);
+    const winner = aovR.cm3p > opsR.cm3p ? 'AOV Growth' : 'Ops Efficiency';
+    const winPct = Math.max(aovR.cm3p, opsR.cm3p);
+    noteEl.innerHTML = `<strong>Read:</strong> With your current inputs, <strong>${winner}</strong> produces the highest CM3 at <strong>${pct(winPct)}</strong>. This tells you where your highest-leverage strategic bet is. In most D2C brands, AOV improvements outperform operational savings at early scale — but ops savings become dominant once you're negotiating 3PL contracts at volume.`;
+  }
+}
+
+function updateUnitEco(r, p) {
+  const ltv     = r.cm3 * 3;
+  const cac     = (p.ads / 0.8) + p.aff;
+  const ratio   = ltv / cac;
+  const payback = cac / Math.max(0.01, r.cm3);
+
+  const ratioClass = ratio >= 3 ? 'good' : ratio >= 2 ? '' : 'warn';
+  const pbClass    = payback <= 3 ? 'good' : payback <= 6 ? '' : 'warn';
+
+  setText('ue-ltv',     fmt(ltv));
+  setText('ue-cac',     fmt(cac));
+  const ratEl = document.getElementById('ue-ratio');
+  if (ratEl) { ratEl.textContent = (Math.round(ratio*10)/10) + '×'; ratEl.className = 'ue-mval ' + ratioClass; }
+  const pbEl  = document.getElementById('ue-payback');
+  if (pbEl)  { pbEl.textContent  = (Math.round(payback*10)/10) + ' orders'; pbEl.className = 'ue-mval ' + pbClass; }
+
+  setText('bm-cm1',  pct(r.cm1p));
+  setText('bm-cm2',  pct(r.cm2p));
+  setText('bm-cm3',  pct(r.cm3p));
+  const ratBm = document.getElementById('bm-ratio');
+  if (ratBm) ratBm.textContent = (Math.round(ratio*10)/10) + '×';
+}
+
+function show(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.htab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'scenario' || id === 'uniteco') calc();
+}
+
+calc();
+</script>
+</body>
+</html>
